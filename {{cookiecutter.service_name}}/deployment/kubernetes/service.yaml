@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{cookiecutter.service_name}}-service
+  namespace: {{cookiecutter.kubernetes_namespace}}
+  labels:
+    app: {{cookiecutter.service_name}}
+spec:
+  selector:
+    app: {{cookiecutter.service_name}}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{cookiecutter.server_port}}
+      name: http
+  type: ClusterIP

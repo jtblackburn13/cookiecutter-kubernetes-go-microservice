@@ -1,0 +1,189 @@
+openapi: 3.0.0
+info:
+  title: {{cookiecutter.service_name}} API
+  description: {{cookiecutter.service_description}}
+  version: 1.0.0
+  contact:
+    name: {{cookiecutter.author_name}}
+    email: {{cookiecutter.author_email}}
+servers:
+  - url: http://localhost:{{cookiecutter.server_port}}
+    description: Local development server
+  - url: https://{{cookiecutter.service_name}}.local
+    description: Kubernetes cluster
+paths:
+  /:
+    get:
+      summary: Get welcome message
+      description: Returns a welcome message from the {{cookiecutter.service_name}} service
+      tags:
+        - General
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Hello from {{cookiecutter.service_name}}!"
+                  service:
+                    type: string
+                    example: "{{cookiecutter.service_name}}"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T12:00:00Z"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the service (liveness probe)
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  service:
+                    type: string
+                    example: "{{cookiecutter.service_name}}"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T12:00:00Z"
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /ready:
+    get:
+      summary: Readiness check
+      description: Returns the readiness status of the service (readiness probe)
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ready"
+                  service:
+                    type: string
+                    example: "{{cookiecutter.service_name}}"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T12:00:00Z"
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /metrics:
+    get:
+      summary: Get service metrics
+      description: Returns basic service metrics and statistics
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Service metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                    example: "{{cookiecutter.service_name}}"
+                  uptime:
+                    type: string
+                    example: "1h30m45s"
+                  requests_total:
+                    type: integer
+                    example: 1234
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T12:00:00Z"
+  /version:
+    get:
+      summary: Get service version
+      description: Returns version information about the service
+      tags:
+        - General
+      responses:
+        '200':
+          description: Service version information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                    example: "{{cookiecutter.service_name}}"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  build_time:
+                    type: string
+                    example: "2024-01-01T12:00:00Z"
+                  git_commit:
+                    type: string
+                    example: "abc123def456"
+                  go_version:
+                    type: string
+                    example: "go{{cookiecutter.go_version}}"
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Internal server error"
+        service:
+          type: string
+          example: "{{cookiecutter.service_name}}"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-01T12:00:00Z"
+      required:
+        - error
+        - service
+        - timestamp
+tags:
+  - name: General
+    description: General service endpoints
+  - name: Health
+    description: Health and readiness check endpoints
+  - name: Monitoring
+    description: Monitoring and metrics endpoints

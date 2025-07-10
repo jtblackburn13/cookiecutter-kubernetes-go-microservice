@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{cookiecutter.service_name}}
+  namespace: {{cookiecutter.kubernetes_namespace}}
+  labels:
+    app: {{cookiecutter.service_name}}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {{cookiecutter.service_name}}
+  template:
+    metadata:
+      labels:
+        app: {{cookiecutter.service_name}}
+    spec:
+      containers:
+      - name: {{cookiecutter.service_name}}
+        image: {{cookiecutter.docker_image_name}}:{{cookiecutter.docker_image_tag}}
+        ports:
+        - containerPort: {{cookiecutter.server_port}}
+        env:
+        - name: PORT
+          value: "{{cookiecutter.server_port}}"
+        - name: ENVIRONMENT
+          value: "production"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{cookiecutter.server_port}}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: {{cookiecutter.server_port}}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"

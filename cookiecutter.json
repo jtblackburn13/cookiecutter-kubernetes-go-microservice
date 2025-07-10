@@ -1,0 +1,12 @@
+{
+    "service_name": "kubernetes-go-microservice",
+    "service_description": "A Go microservice for Kubernetes deployment",
+    "go_module_name": "github.com/jtblackburn13/{{cookiecutter.service_name}}",
+    "author_name": "Tyler Blackburn",
+    "author_email": "your.email@example.com",
+    "server_port": "8080",
+    "kubernetes_namespace": "default",
+    "docker_image_name": "{{cookiecutter.service_name}}",
+    "docker_image_tag": "latest",
+    "go_version": "1.21"
+}
