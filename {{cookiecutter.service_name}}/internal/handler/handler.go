@@ -15,11 +15,12 @@ import (
 )
 
 type Handler struct {
-	startTime    time.Time
-	requestCount int64
-	version      string
-	buildTime    string
-	gitCommit    string
+	startTime      time.Time
+	requestCount   int64
+	requestsByPath map[string]int64
+	version        string
+	buildTime      string
+	gitCommit      string
 }
 
 type Response struct {
@@ -35,11 +36,12 @@ type HealthResponse struct {
 }
 
 type MetricsResponse struct {
-	Service       string    `json:"service"`
-	Uptime        string    `json:"uptime"`
-	RequestsTotal int64     `json:"requests_total"`
-	Version       string    `json:"version"`
-	Timestamp     time.Time `json:"timestamp"`
+	Service        string           `json:"service"`
+	Uptime         string           `json:"uptime"`
+	RequestsTotal  int64            `json:"requests_total"`
+	RequestsByPath map[string]int64 `json:"requests_by_path"`
+	Version        string           `json:"version"`
+	Timestamp      time.Time        `json:"timestamp"`
 }
 
 type VersionResponse struct {
@@ -66,6 +68,9 @@ func New() *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
+	// Middleware to count requests
+	router.Use(h.RequestCountMiddleware)
+
 	// API routes
 	router.Get("/", h.HandleRoot)
 	router.Get("/health", h.HandleHealth)
@@ -80,13 +85,11 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 
 	// Serve swagger.yaml file
 	router.Get("/swagger.yaml", h.HandleSwaggerYAML)
-
-	// Middleware to count requests
-	router.Use(h.RequestCountMiddleware)
 }
 
 func (h *Handler) RequestCountMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h.requestsByPath[r.RequestURI] += 1
 		atomic.AddInt64(&h.requestCount, 1)
 		next.ServeHTTP(w, r)
 	})
@@ -129,11 +132,12 @@ func (h *Handler) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 	uptime := time.Since(h.startTime)
 
 	response := MetricsResponse{
-		Service:       "{{cookiecutter.service_name}}",
-		Uptime:        uptime.String(),
-		RequestsTotal: atomic.LoadInt64(&h.requestCount),
-		Version:       h.version,
-		Timestamp:     time.Now(),
+		Service:        "{{cookiecutter.service_name}}",
+		Uptime:         uptime.String(),
+		RequestsTotal:  atomic.LoadInt64(&h.requestCount),
+		RequestsByPath: h.requestsByPath,
+		Version:        h.version,
+		Timestamp:      time.Now(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")

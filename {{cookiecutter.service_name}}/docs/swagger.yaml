@@ -125,6 +125,13 @@ paths:
                   requests_total:
                     type: integer
                     example: 1234
+                  requests_by_path:
+                    type: object
+                    example: {
+                      "/health": 24,
+                      "ready": 15,
+                      "/": 8
+                    }
                   version:
                     type: string
                     example: "1.0.0"
