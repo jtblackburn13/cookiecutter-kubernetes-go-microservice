@@ -60,10 +60,11 @@ type ErrorResponse struct {
 
 func New() *Handler {
 	return &Handler{
-		startTime: time.Now(),
-		version:   "1.0.0",
-		buildTime: time.Now().Format(time.RFC3339),
-		gitCommit: "unknown",
+		startTime:      time.Now(),
+		version:        "1.0.0",
+		requestsByPath: map[string]int64{},
+		buildTime:      time.Now().Format(time.RFC3339),
+		gitCommit:      "unknown",
 	}
 }
 
